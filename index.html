@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <title>웹툰 제목 맞추기 퀴즈</title>
+  <title>신발 보고 제목 맞추기 퀴즈</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     :root {
@@ -301,6 +301,13 @@
         max-height: 260px;
       }
     }
+
+    /* 🔥 힌트 완전 숨기기 */
+    #hint-label,
+    #hint-full,
+    #show-hint-btn {
+      display: none !important;
+    }
   </style>
 </head>
 
@@ -309,8 +316,8 @@
     <div class="card" id="game-card">
       <div class="header">
         <div>
-          <div class="title">웹툰 제목 맞추기</div>
-          <div class="subtitle">장면을 보고 웹툰 제목을 입력해봐</div>
+          <div class="title">신발 보고 제목 맞추기 퀴즈</div>
+          <div class="subtitle">신발 컷만 보고 웹툰 제목을 맞춰봐</div>
         </div>
         <div style="text-align:right;">
           <div style="font-size:11px;color:var(--text-muted);">
@@ -341,12 +348,12 @@
       </div>
 
       <div class="question-meta">
-        <span id="difficulty-label">난이도: 보통</span>
-        <span id="hint-label">힌트: <span id="hint-short">비 오는 날, 첫 만남</span></span>
+        <span id="difficulty-label">난이도: 최상</span>
+        <span id="hint-label">힌트: <span id="hint-short"></span></span>
       </div>
 
       <p class="hint" id="hint-full">
-        <strong>힌트</strong>를 참고해서 웹툰 <strong>정확한 제목</strong>을 적어줘.
+        <!-- 힌트 숨겨짐 -->
       </p>
 
       <div class="controls" id="control-row">
@@ -372,30 +379,85 @@
     // 문제 목록: 이미지 경로, 정답, 허용 별칭, 난이도, 힌트
     const questions = [
       {
-        image: "images/q1.png",
-        answer: "비 오는 날의 너",
-        aliases: ["비오는날의너", "비오는 날의 너", "비오는날의 너"],
-        difficulty: "쉬움",
-        shortHint: "비 오는 날, 버스정류장",
-        fullHint: "빗속에서 우산을 함께 쓰는 두 사람이 처음 만나는 장면이야."
+        image: "images/shoes01.png",
+        answer: "주의평화",
+        aliases: [],
+        difficulty: "최상",
+        shortHint: "",
+        fullHint: ""
       },
       {
-        image: "images/q2.png",
-        answer: "사라지는 너를 붙잡다",
-        aliases: ["사라지는너를붙잡다"],
-        difficulty: "보통",
-        shortHint: "목걸이, 불안한 고백",
-        fullHint: "주인공이 친구에게 '네가 또 사라질까 봐'라고 말하는 장면이야."
+        image: "images/q02.png",
+        answer: "정답2",
+        aliases: [],
+        difficulty: "최상",
+        shortHint: "",
+        fullHint: ""
       },
       {
-        image: "images/q3.png",
-        answer: "붕대 아래의 진실",
-        aliases: ["붕대아래의진실"],
-        difficulty: "어려움",
-        shortHint: "손목 붕대, 회색톤 에피소드",
-        fullHint: "한 화 전체가 회색인 가운데, 공의 손목 붕대가 유일하게 강조돼."
+        image: "images/q03.png",
+        answer: "정답3",
+        aliases: [],
+        difficulty: "최상",
+        shortHint: "",
+        fullHint: ""
+      },
+      {
+        image: "images/q04.png",
+        answer: "정답4",
+        aliases: [],
+        difficulty: "최상",
+        shortHint: "",
+        fullHint: ""
+      },
+      {
+        image: "images/q05.png",
+        answer: "정답5",
+        aliases: [],
+        difficulty: "최상",
+        shortHint: "",
+        fullHint: ""
+      },
+      {
+        image: "images/q06.png",
+        answer: "정답6",
+        aliases: [],
+        difficulty: "최상",
+        shortHint: "",
+        fullHint: ""
+      },
+      {
+        image: "images/q07.png",
+        answer: "정답7",
+        aliases: [],
+        difficulty: "최상",
+        shortHint: "",
+        fullHint: ""
+      },
+      {
+        image: "images/q08.png",
+        answer: "정답8",
+        aliases: [],
+        difficulty: "최상",
+        shortHint: "",
+        fullHint: ""
+      },
+      {
+        image: "images/q09.png",
+        answer: "정답9",
+        aliases: [],
+        difficulty: "최상",
+        shortHint: "",
+        fullHint: ""
+      },
+      {
+        image: "images/q10.png",
+        answer: "정답10",
+        aliases: [],
+        difficulty: "최상",
+        shortHint: "",
+        fullHint: ""
       }
-      // 필요하면 여기 아래로 계속 추가
     ];
 
     // ====== 여기까지가 수정 포인트 ======
@@ -435,9 +497,9 @@
       imgEl.src = q.image;
       imgEl.alt = `웹툰 장면 ${state.index + 1}`;
       badgeText.textContent = `Stage ${state.index + 1}`;
-      difficultyLabel.textContent = `난이도: ${q.difficulty}`;
-      hintShort.textContent = q.shortHint;
-      hintFull.textContent = q.fullHint;
+      difficultyLabel.textContent = `난이도: ${q.difficulty || "최상"}`;
+      hintShort.textContent = q.shortHint || "";
+      hintFull.textContent = q.fullHint || "";
       statusText.textContent = "";
       statusText.className = "status info";
       answerInput.value = "";
@@ -529,7 +591,7 @@
       statusText.textContent = "힌트가 열렸어. 다시 한 번 생각해봐.";
       statusText.className = "status info";
       state.usedExtendedHint = true;
-      // 필요하면 여기서 점수 패널티 같은 것도 줄 수 있음
+      // 힌트 UI는 숨겨져 있으니 실제로는 안 보임
     }
 
     submitBtn.addEventListener("click", checkAnswer);
