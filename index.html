@@ -136,7 +136,7 @@
 
     .question-meta {
       display: flex;
-      justify-content: space-between;
+      justify-content: flex-end; /* 오른쪽 정렬만 사용 */
       align-items: center;
       font-size: 11px;
       color: var(--text-muted);
@@ -147,11 +147,6 @@
       font-size: 12px;
       line-height: 1.4;
       color: var(--text-muted);
-    }
-
-    .hint strong {
-      color: var(--accent);
-      font-weight: 600;
     }
 
     .controls {
@@ -238,21 +233,11 @@
     }
 
     @keyframes shake {
-      0% {
-        transform: translateX(0);
-      }
-      25% {
-        transform: translateX(-4px);
-      }
-      50% {
-        transform: translateX(4px);
-      }
-      75% {
-        transform: translateX(-2px);
-      }
-      100% {
-        transform: translateX(0);
-      }
+      0% { transform: translateX(0); }
+      25% { transform: translateX(-4px); }
+      50% { transform: translateX(4px); }
+      75% { transform: translateX(-2px); }
+      100% { transform: translateX(0); }
     }
 
     .result-screen {
@@ -302,7 +287,7 @@
       }
     }
 
-    /* 🔥 힌트 완전 숨기기 */
+    /* 🔥 힌트/힌트 버튼 완전 숨기기 */
     #hint-label,
     #hint-full,
     #show-hint-btn {
@@ -348,13 +333,11 @@
       </div>
 
       <div class="question-meta">
-        <span id="difficulty-label">난이도: 최상</span>
-        <span id="hint-label">힌트: <span id="hint-short"></span></span>
+        <!-- 난이도 제거, 오른쪽은 비워둠 -->
+        <span id="hint-label"></span>
       </div>
 
-      <p class="hint" id="hint-full">
-        <!-- 힌트 숨겨짐 -->
-      </p>
+      <p class="hint" id="hint-full"></p>
 
       <div class="controls" id="control-row">
         <input
@@ -376,87 +359,57 @@
   <script>
     // ====== 여기서부터 보스가 수정해서 쓰는 영역 ======
 
-    // 문제 목록: 이미지 경로, 정답, 허용 별칭, 난이도, 힌트
+    // 문제 목록: 이미지 경로, 정답, 허용 별칭
     const questions = [
       {
         image: "images/q01.png",
         answer: "주의평화",
-        aliases: [],
-        difficulty: "최상",
-        shortHint: "",
-        fullHint: ""
+        aliases: []
       },
       {
         image: "images/q02.png",
-        answer: "정답2",
-        aliases: [],
-        difficulty: "최상",
-        shortHint: "",
-        fullHint: ""
+        answer: "신을품는방법",
+        aliases: []
       },
       {
         image: "images/q03.png",
-        answer: "정답3",
-        aliases: [],
-        difficulty: "최상",
-        shortHint: "",
-        fullHint: ""
+        answer: "플래시라이트",
+        aliases: []
       },
       {
         image: "images/q04.png",
-        answer: "정답4",
-        aliases: [],
-        difficulty: "최상",
-        shortHint: "",
-        fullHint: ""
+        answer: "가족간계증명서",
+        aliases: []
       },
       {
         image: "images/q05.png",
-        answer: "정답5",
-        aliases: [],
-        difficulty: "최상",
-        shortHint: "",
-        fullHint: ""
+        answer: "코드네임 아나스타샤",
+        aliases: []
       },
       {
         image: "images/q06.png",
-        answer: "정답6",
-        aliases: [],
-        difficulty: "최상",
-        shortHint: "",
-        fullHint: ""
+        answer: "백라이트",
+        aliases: []
       },
       {
         image: "images/q07.png",
-        answer: "정답7",
-        aliases: [],
-        difficulty: "최상",
-        shortHint: "",
-        fullHint: ""
+        answer: "징크스",
+        aliases: []
       },
       {
         image: "images/q08.png",
-        answer: "정답8",
-        aliases: [],
-        difficulty: "최상",
-        shortHint: "",
-        fullHint: ""
+        answer: "더티하이",
+        aliases: []
       },
       {
         image: "images/q09.png",
-        answer: "정답9",
-        aliases: [],
-        difficulty: "최상",
-        shortHint: "",
-        fullHint: ""
+        answer: "이리사랑스러운너",
+        aliases: []
       },
       {
         image: "images/q10.png",
-        answer: "정답10",
-        aliases: [],
-        difficulty: "최상",
-        shortHint: "",
-        fullHint: ""
+        answer: "배드애플",
+        aliases: []
       }
     ];
 
@@ -472,9 +425,6 @@
     const stepLabel = document.getElementById("step-label");
     const progressFill = document.getElementById("progress-fill");
     const progressPercent = document.getElementById("progress-percent");
-    const difficultyLabel = document.getElementById("difficulty-label");
-    const hintShort = document.getElementById("hint-short");
-    const hintFull = document.getElementById("hint-full");
     const badgeText = document.getElementById("badge-text");
     const answerInput = document.getElementById("answer-input");
     const submitBtn = document.getElementById("submit-btn");
@@ -483,12 +433,13 @@
     const scoreLabel = document.getElementById("score-label");
     const gameCard = document.getElementById("game-card");
 
+    // 🔥 띄어쓰기/대소문자 무시용 정규화 함수
     function normalize(text) {
       return text
         .toString()
         .trim()
         .toLowerCase()
-        .replace(/\s+/g, "");
+        .replace(/\s+/g, ""); // 모든 공백 제거
     }
 
     function loadQuestion() {
@@ -497,9 +448,6 @@
       imgEl.src = q.image;
       imgEl.alt = `웹툰 장면 ${state.index + 1}`;
       badgeText.textContent = `Stage ${state.index + 1}`;
-      difficultyLabel.textContent = `난이도: ${q.difficulty || "최상"}`;
-      hintShort.textContent = q.shortHint || "";
-      hintFull.textContent = q.fullHint || "";
       statusText.textContent = "";
       statusText.className = "status info";
       answerInput.value = "";
@@ -541,6 +489,7 @@
     function checkAnswer() {
       const q = questions[state.index];
       const userAnswer = normalize(answerInput.value);
+
       if (!userAnswer) {
         statusText.textContent = "제목을 입력해줘.";
         statusText.className = "status info";
@@ -583,6 +532,7 @@
     }
 
     function showExtendedHint() {
+      // 지금은 UI에서 숨겨져 있어서 실질적으로 노출 안 됨
       if (state.usedExtendedHint) {
         statusText.textContent = "이미 힌트를 다 열었어.";
         statusText.className = "status info";
@@ -591,7 +541,6 @@
       statusText.textContent = "힌트가 열렸어. 다시 한 번 생각해봐.";
       statusText.className = "status info";
       state.usedExtendedHint = true;
-      // 힌트 UI는 숨겨져 있으니 실제로는 안 보임
     }
 
     submitBtn.addEventListener("click", checkAnswer);
