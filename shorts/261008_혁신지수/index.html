@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="ko" data-resolution="portrait">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <script src="assets/gsap.min.js"></script>
+    <script>
+      // ▼ 바뀔 수 있는 값은 여기 한 곳에서만 고친다 ▼
+      window.CFG = {
+        years: [2020, 2021, 2022, 2023, 2024, 2025, 2026],
+        korea: [10, 5, 6, 10, 6, 4, 4], // WIPO 글로벌 혁신지수 한국 순위 (연도 순서)
+        // 회색 참고선 (같은 차트에 있던 상위권 나라들)
+        others: [
+          [1, 1, 1, 1, 1, 1, 1], // 스위스
+          [2, 2, 3, 2, 2, 2, 2], // 스웨덴
+          [3, 3, 2, 3, 3, 3, 3], // 미국
+          [4, 4, 4, 4, 5, 6, 6], // 영국
+          [8, 8, 7, 5, 4, 5, 5], // 싱가포르
+        ],
+        maxRank: 12,
+      };
+    </script>
+    <style>
+      @font-face {
+        font-family: "JZJ";
+        src: url("assets/KyoboHandwriting2025lyb.ttf") format("truetype"),
+          url("assets/Gaegu-Bold.ttf") format("truetype");
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body {
+        width: 1080px; height: 1920px; overflow: hidden; background: #ffffff;
+      }
+      #root {
+        position: relative; width: 1080px; height: 1920px; overflow: hidden;
+        font-family: "JZJ", sans-serif; color: #1b2a6b;
+      }
+      .clip { position: absolute; inset: 0; }
+
+      /* 흐르는 도트 그리드 배경 */
+      #bg {
+        background-color: #ffffff;
+        background-image: radial-gradient(circle, #d4e9ff 3.5px, transparent 4px);
+        background-size: 54px 54px;
+      }
+
+      /* 손글씨 공통: 흰 외곽선 6px + 연한 그림자 */
+      .t {
+        position: absolute; left: 60px; width: 880px; text-align: center;
+        line-height: 1.15; white-space: nowrap;
+        -webkit-text-stroke: 12px #ffffff; paint-order: stroke fill;
+        text-shadow: 0 6px 14px rgba(27, 42, 107, 0.14);
+      }
+      .main { font-size: 108px; }
+      .cap { font-size: 100px; }
+      .sub { font-size: 64px; }
+      .big { font-size: 196px; line-height: 1; }
+
+      /* 형광펜 하이라이트 */
+      .hl { position: relative; display: inline-block; isolation: isolate; }
+      .hl > i {
+        position: absolute; left: -14px; right: -14px; top: 22%; bottom: 2%;
+        background: #c8ff3d; border-radius: 22px; z-index: -1;
+        transform-origin: 0% 50%;
+      }
+
+      .box {
+        position: absolute; left: 60px; width: 880px;
+        background: #e3f2ff; border-radius: 44px;
+      }
+
+      /* 차트 */
+      #chart-svg { position: absolute; left: 0; top: 0; }
+      .badge {
+        position: absolute; height: 92px; padding: 0 26px; border-radius: 46px;
+        background: #1b2a6b; color: #ffffff; font-size: 64px; line-height: 92px;
+        white-space: nowrap;
+      }
+      .confetti { position: absolute; width: 22px; height: 34px; border-radius: 6px; }
+
+      /* 순위 리스트 */
+      .row {
+        position: absolute; left: 60px; width: 880px; height: 136px;
+        background: #e3f2ff; border-radius: 40px; font-size: 92px; line-height: 136px;
+      }
+      .row b { position: absolute; left: 56px; font-weight: normal; }
+      .row span { position: absolute; left: 270px; }
+
+      /* 마지막 장면 */
+      #btn {
+        position: absolute; left: 284px; top: 660px; width: 432px; height: 128px;
+        border-radius: 64px; font-size: 56px; line-height: 128px; text-align: center;
+      }
+      #btn-on, #btn-off { position: absolute; inset: 0; border-radius: 64px; }
+      #btn-on { background: #ff2d2d; color: #ffffff; }
+      #btn-off { background: #e3e7ef; color: #1b2a6b; }
+      #logo { position: absolute; left: 257px; top: 880px; width: 486px; }
+      #handle { top: 1240px; font-size: 48px; }
+
+      #wipe { background: #ffffff; }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="48" data-width="1080" data-height="1920">
+      <div id="bg" class="clip" data-start="0" data-duration="48" data-track-index="0"></div>
+
+      <!-- 1. 훅 -->
+      <div id="s1" class="clip" data-start="0" data-duration="4.7" data-track-index="1">
+        <div id="s1-a" class="t main" style="top: 470px">한국 혁신 순위</div>
+        <div class="t big" style="top: 720px">
+          <span id="s1-b">10위</span><span id="s1-arrow" style="display: inline-block; margin: 0 14px">→</span><span id="s1-c" class="hl"><i></i>4위</span>
+        </div>
+        <div id="s1-d" class="t sub" style="top: 1070px">세계 혁신지수, 7년의 기록</div>
+      </div>
+
+      <!-- 2. 이게 뭐냐면 -->
+      <div id="s2" class="clip" data-start="4.7" data-duration="4.8" data-track-index="1">
+        <div id="s2-a" class="t main" style="top: 300px">이게 뭐냐면</div>
+        <div id="s2-box" class="box" style="top: 560px; height: 640px"></div>
+        <div id="s2-b" class="t" style="top: 640px; font-size: 112px"><span class="hl"><i></i>글로벌 혁신지수</span></div>
+        <div id="s2-c" class="t sub" style="top: 830px">세계지식재산기구(WIPO)가</div>
+        <div id="s2-d" class="t sub" style="top: 920px">매년 발표하는 나라별 혁신 순위</div>
+        <div id="s2-e" class="t sub" style="top: 1060px">2026년 · 139개국 평가</div>
+      </div>
+
+      <!-- 3. 순위 차트 -->
+      <div id="s3" class="clip" data-start="9.5" data-duration="20" data-track-index="1">
+        <div id="cap0" class="t main cap" style="top: 250px"><span>2020년, </span><span class="hl"><i></i>10위</span></div>
+        <div id="cap1" class="t main cap" style="top: 250px">2021년, <span class="hl"><i></i>5위</span>로 껑충</div>
+        <div id="cap2" class="t main cap" style="top: 250px">2022년, <span class="hl"><i></i>6위</span></div>
+        <div id="cap3" class="t main cap" style="top: 250px">2023년, 다시 <span class="hl"><i></i>10위</span></div>
+        <div id="cap4" class="t main cap" style="top: 250px">2024년, <span class="hl"><i></i>6위</span>로 반등</div>
+        <div id="cap5" class="t main cap" style="top: 250px">2025년, 처음 <span class="hl"><i></i>4위!</span></div>
+        <div id="cap6" class="t main cap" style="top: 250px">2026년, <span class="hl"><i></i>연속 4위</span></div>
+        <div id="chart">
+          <svg id="chart-svg" width="1080" height="1920" viewBox="0 0 1080 1920"></svg>
+          <div id="badges"></div>
+          <div id="confetti"></div>
+        </div>
+        <div id="src" class="t sub" style="top: 1390px; font-size: 60px">출처 · WIPO 글로벌 혁신지수</div>
+      </div>
+
+      <!-- 4. 위에는 세 나라 -->
+      <div id="s4" class="clip" data-start="29.5" data-duration="6" data-track-index="1">
+        <div id="s4-a" class="t main" style="top: 300px">한국 위엔 세 나라뿐</div>
+        <div id="s4-b" class="t sub" style="top: 450px">2026년 순위</div>
+        <div class="row" id="r1" style="top: 600px"><b>1위</b><span>스위스</span></div>
+        <div class="row" id="r2" style="top: 770px"><b>2위</b><span>스웨덴</span></div>
+        <div class="row" id="r3" style="top: 940px"><b>3위</b><span>미국</span></div>
+        <div class="row" id="r4" style="top: 1110px; background: #ffffff; box-shadow: 0 0 0 6px #1b2a6b inset"><b>4위</b><span class="hl"><i></i>대한민국</span></div>
+      </div>
+
+      <!-- 5. 강점 -->
+      <div id="s5" class="clip" data-start="35.5" data-duration="6" data-track-index="1">
+        <div id="s5-a" class="t main" style="top: 300px">한국이 특히 강한 곳</div>
+        <div id="s5-box1" class="box" style="top: 560px; height: 330px"></div>
+        <div id="s5-b" class="t sub" style="top: 600px; font-size: 76px">인적자본·연구</div>
+        <div id="s5-c" class="t" style="top: 710px; font-size: 104px"><span class="hl"><i></i>8년 연속 1위</span></div>
+        <div id="s5-box2" class="box" style="top: 950px; height: 330px"></div>
+        <div id="s5-d" class="t sub" style="top: 990px; font-size: 76px">창의적 산출</div>
+        <div id="s5-e" class="t" style="top: 1100px; font-size: 104px">세계 2위</div>
+      </div>
+
+      <!-- 6. 마무리 -->
+      <div id="s6" class="clip" data-start="41.5" data-duration="6.5" data-track-index="1">
+        <div id="s6-a" class="t main" style="top: 300px">다음 목표는 <span class="hl"><i></i>3위?</span></div>
+        <div id="s6-b" class="t sub" style="top: 500px">여러분 생각은? 댓글로!</div>
+        <div id="btn">
+          <div id="btn-on">구독</div>
+          <div id="btn-off" style="opacity: 0">구독중</div>
+        </div>
+        <img id="logo" src="assets/logo.png" alt="" />
+        <div id="handle" class="t">@thepoliticsjam</div>
+      </div>
+
+      <div id="wipe" class="clip" data-start="0" data-duration="48" data-track-index="9"></div>
+
+      <audio id="bgm" src="assets/bgm.wav" data-start="0" data-duration="48" data-track-index="10" data-volume="0.55"></audio>
+      <audio id="sfx" src="assets/sfx.wav" data-start="0" data-duration="48" data-track-index="11" data-volume="1"></audio>
+    </div>
+
+    <script>
+      (function () {
+        const C = window.CFG;
+        const tl = gsap.timeline({ paused: true });
+        const NS = "http://www.w3.org/2000/svg";
+
+        // ---------- 공용 동작 ----------
+        const textIn = (sel, t) =>
+          tl.fromTo(sel, { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.35, ease: "power2.out" }, t);
+        const textOut = (sel, t) => tl.to(sel, { opacity: 0, y: -24, duration: 0.25, ease: "power1.in" }, t);
+        const highlight = (scope, t) =>
+          tl.fromTo(scope + " .hl > i", { scaleX: 0 }, { scaleX: 1, duration: 0.45, ease: "power2.out" }, t);
+        const pop = (sel, t) =>
+          tl.fromTo(sel, { opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1, duration: 0.45, ease: "back.out(2.2)" }, t);
+        const wipe = (t) =>
+          tl.fromTo("#wipe", { xPercent: -100 }, { xPercent: 100, duration: 0.4, ease: "power2.inOut" }, t - 0.2);
+
+        // 배경 도트가 천천히 흐름
+        tl.fromTo("#bg", { backgroundPosition: "0px 0px" }, { backgroundPosition: "0px -540px", duration: 48, ease: "none" }, 0);
+        tl.set("#wipe", { xPercent: -100 }, 0);
+
+        // ---------- 1. 훅 (0 ~ 4.7) ----------
+        textIn("#s1-a", 0.2);
+        pop("#s1-b", 0.8);
+        tl.fromTo("#s1-arrow", { opacity: 0, x: -60 }, { opacity: 1, x: 0, duration: 0.4, ease: "power2.out" }, 1.4);
+        tl.fromTo("#s1-c", { opacity: 0, scale: 0.3 }, { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(2.6)" }, 1.8);
+        highlight("#s1", 2.4);
+        textIn("#s1-d", 3.0);
+        tl.to("#s1-arrow", { x: 14, duration: 0.6, ease: "sine.inOut" }, 3.4);
+        tl.to("#s1-arrow", { x: 0, duration: 0.6, ease: "sine.inOut" }, 4.0);
+
+        // ---------- 2. 설명 (4.7 ~ 9.5) ----------
+        wipe(4.7);
+        textIn("#s2-a", 4.8);
+        tl.fromTo("#s2-box", { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.6)" }, 5.3);
+        textIn("#s2-b", 5.5);
+        highlight("#s2", 6.0);
+        textIn("#s2-c", 6.6);
+        textIn("#s2-d", 7.0);
+        textIn("#s2-e", 7.8);
+        tl.to("#s2-box", { scale: 1.02, duration: 0.6, ease: "sine.inOut" }, 8.4);
+
+        // ---------- 3. 차트 (9.5 ~ 29.5) ----------
+        wipe(9.5);
+        const svg = document.getElementById("chart-svg");
+        const X0 = 210, DX = 112, Y0 = 600, DY = 64;
+        const px = (i) => X0 + i * DX;
+        const py = (r) => Y0 + (r - 1) * DY;
+        const el = (tag, attrs, parent) => {
+          const n = document.createElementNS(NS, tag);
+          for (const k in attrs) n.setAttribute(k, attrs[k]);
+          (parent || svg).appendChild(n);
+          return n;
+        };
+        const curve = (i, r0, r1) => {
+          const x0 = px(i), x1 = px(i + 1), y0 = py(r0), y1 = py(r1), h = DX / 2;
+          return `M${x0} ${y0} C${x0 + h} ${y0} ${x1 - h} ${y1} ${x1} ${y1}`;
+        };
+
+        const grid = el("g", { id: "grid" });
+        for (let r = 1; r <= C.maxRank; r++)
+          for (let i = 0; i < C.years.length; i++)
+            el("circle", { cx: px(i), cy: py(r), r: 7, fill: "#dde6f3" }, grid);
+        C.years.forEach((y, i) => {
+          const t = el("text", { x: px(i), y: 540, "text-anchor": "middle", "font-size": 60, fill: "#1b2a6b", "font-family": "JZJ" }, grid);
+          t.textContent = String(y).slice(2);
+        });
+        [[1, "1위"], [5, "5위"], [10, "10위"]].forEach(([r, s]) => {
+          const t = el("text", { x: 150, y: py(r) + 20, "text-anchor": "end", "font-size": 60, fill: "#1b2a6b", "font-family": "JZJ" }, grid);
+          t.textContent = s;
+        });
+        const yearTag = el("text", { x: 150, y: 540, "text-anchor": "end", "font-size": 60, fill: "#1b2a6b", "font-family": "JZJ" }, grid);
+        yearTag.textContent = "년";
+
+        const greys = el("g", { id: "greys" });
+        C.others.forEach((ranks) => {
+          let d = "";
+          for (let i = 0; i < ranks.length - 1; i++) d += curve(i, ranks[i], ranks[i + 1]) + " ";
+          el("path", { d, fill: "none", stroke: "#c3cfe3", "stroke-width": 7, "stroke-linecap": "round", pathLength: 1, "stroke-dasharray": 1, class: "grey-line" }, greys);
+          ranks.forEach((r, i) => el("circle", { cx: px(i), cy: py(r), r: 11, fill: "#c3cfe3" }, greys));
+        });
+
+        const kor = el("g", { id: "kor" });
+        const segs = [];
+        for (let i = 0; i < C.korea.length - 1; i++)
+          segs.push(el("path", { d: curve(i, C.korea[i], C.korea[i + 1]), fill: "none", stroke: "#1b2a6b", "stroke-width": 14, "stroke-linecap": "round", pathLength: 1, "stroke-dasharray": 1, "stroke-dashoffset": 1 }, kor));
+        const dots = C.korea.map((r, i) => el("circle", { cx: px(i), cy: py(r), r: 19, fill: "#1b2a6b", stroke: "#ffffff", "stroke-width": 6 }, kor));
+
+        // 현재 순위 배지 (점 위쪽)
+        const badgeWrap = document.getElementById("badges");
+        const badges = C.korea.map((r, i) => {
+          const b = document.createElement("div");
+          b.className = "badge";
+          b.textContent = (i === C.korea.length - 1 ? "한국 " : "") + r + "위";
+          badgeWrap.appendChild(b);
+          return b;
+        });
+
+        const chartStart = 9.5;
+        tl.fromTo("#grid", { opacity: 0 }, { opacity: 1, duration: 0.5 }, chartStart + 0.1);
+        tl.fromTo(".grey-line", { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 1.0, ease: "power1.inOut" }, chartStart + 0.5);
+        tl.fromTo("#greys circle", { opacity: 0 }, { opacity: 1, duration: 0.6 }, chartStart + 0.7);
+        textIn("#src", chartStart + 0.6);
+
+        // 단계별 시간표: [캡션 등장, 선 그리기 시작]
+        const steps = [
+          [9.6, null],
+          [11.9, 12.1],
+          [14.6, 14.8],
+          [16.9, 17.1],
+          [19.9, 20.1],
+          [22.3, 22.5],
+          [25.7, 25.9],
+        ];
+        const DRAW = 0.8;
+        steps.forEach(([capT, drawT], i) => {
+          if (i > 0) textOut("#cap" + (i - 1), capT - 0.3);
+          textIn("#cap" + i, capT);
+          const arrive = drawT === null ? chartStart + 1.4 : drawT + DRAW;
+          if (drawT !== null)
+            tl.fromTo(segs[i - 1], { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: DRAW, ease: "power1.inOut" }, drawT);
+          tl.fromTo(dots[i], { scale: 0, transformOrigin: "50% 50%" }, { scale: 1, duration: 0.35, ease: "back.out(3)" }, arrive - 0.05);
+          // 배지: 점 위로 이동
+          const bw = i === C.korea.length - 1 ? 250 : 150;
+          let left = px(i) - bw / 2;
+          left = Math.min(left, 930 - bw);
+          tl.set(badges[i], { left, top: py(C.korea[i]) - 132, width: bw, textAlign: "center", padding: 0 }, 0);
+          tl.fromTo(badges[i], { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.3, ease: "back.out(2)" }, arrive);
+          if (i > 0) tl.to(badges[i - 1], { opacity: 0, duration: 0.2 }, arrive - 0.1);
+          highlight("#cap" + i, capT + 0.45);
+        });
+
+        // 2023 하락: 흔들림
+        const drop = steps[3][1] + DRAW;
+        [-16, 14, -9, 5, 0].forEach((x, k) => tl.to("#chart", { x, duration: 0.08, ease: "none" }, drop + k * 0.08));
+
+        // 2025 첫 4위: 줌 펀치 + 컨페티
+        const peak = steps[5][1] + DRAW;
+        tl.to("#chart", { scale: 1.06, transformOrigin: px(5) + "px " + py(4) + "px", duration: 0.16, ease: "power2.out" }, peak);
+        tl.to("#chart", { scale: 1, duration: 0.4, ease: "power2.inOut" }, peak + 0.16);
+        const cf = document.getElementById("confetti");
+        let seed = 7;
+        const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+        for (let k = 0; k < 40; k++) {
+          const p = document.createElement("div");
+          p.className = "confetti";
+          p.style.background = k % 2 ? "#c8ff3d" : "#9fd2ff";
+          p.style.left = px(5) - 11 + "px";
+          p.style.top = py(4) - 17 + "px";
+          cf.appendChild(p);
+          const a = rnd() * Math.PI * 2, d = 160 + rnd() * 260;
+          tl.fromTo(p, { x: 0, y: 0, rotation: 0, opacity: 0, scale: 0.6 },
+            { x: Math.cos(a) * d, y: Math.sin(a) * d - 80, rotation: rnd() * 540 - 270, opacity: 1, scale: 1, duration: 0.7, ease: "power3.out" }, peak + 0.02);
+          tl.to(p, { y: "+=" + (160 + rnd() * 120), opacity: 0, duration: 0.8, ease: "power1.in" }, peak + 0.72);
+        }
+
+        // 마지막: 한국 선 강조
+        tl.to("#kor path", { attr: { "stroke-width": 18 }, duration: 0.4 }, 27.2);
+        tl.to("#greys", { opacity: 0.45, duration: 0.6 }, 27.2);
+
+        // ---------- 4. 상위 세 나라 (29.5 ~ 35.5) ----------
+        wipe(29.5);
+        textIn("#s4-a", 29.6);
+        textIn("#s4-b", 30.0);
+        ["#r1", "#r2", "#r3"].forEach((r, k) =>
+          tl.fromTo(r, { opacity: 0, x: -80 }, { opacity: 1, x: 0, duration: 0.4, ease: "power2.out" }, 30.5 + k * 0.55));
+        tl.fromTo("#r4", { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(2.2)" }, 32.4);
+        highlight("#s4", 33.0);
+        tl.to("#r4", { scale: 1.03, duration: 0.5, ease: "sine.inOut" }, 34.2);
+
+        // ---------- 5. 강점 (35.5 ~ 41.5) ----------
+        wipe(35.5);
+        textIn("#s5-a", 35.6);
+        tl.fromTo("#s5-box1", { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.6)" }, 36.1);
+        textIn("#s5-b", 36.3);
+        textIn("#s5-c", 36.7);
+        highlight("#s5", 37.2);
+        tl.fromTo("#s5-box2", { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.6)" }, 38.4);
+        textIn("#s5-d", 38.6);
+        textIn("#s5-e", 39.0);
+        tl.to("#s5-box2", { scale: 1.02, duration: 0.6, ease: "sine.inOut" }, 40.2);
+
+        // ---------- 6. 마무리 (41.5 ~ 48) ----------
+        wipe(41.5);
+        textIn("#s6-a", 41.6);
+        highlight("#s6", 42.2);
+        textIn("#s6-b", 42.8);
+        pop("#btn", 43.4);
+        tl.to("#btn", { scale: 0.92, duration: 0.1 }, 44.6);
+        tl.set("#btn-off", { opacity: 1 }, 44.7);
+        tl.set("#btn-on", { opacity: 0 }, 44.7);
+        tl.to("#btn", { scale: 1, duration: 0.25, ease: "back.out(3)" }, 44.7);
+        tl.fromTo("#logo", { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.5, ease: "power2.out" }, 45.2);
+        textIn("#handle", 45.5);
+        tl.to("#s6", { opacity: 0, duration: 0.5 }, 47.4);
+
+
+      // 글자가 화면 폭(880px)을 넘으면 폰트 로딩 뒤 자동으로 줄인다 (교보 손글씨로 바꿔도 안전)
+      (function () {
+        const ctx = document.createElement("canvas").getContext("2d");
+        const fit = () =>
+          document.querySelectorAll(".t").forEach((e) => {
+            const fs = parseFloat(e.dataset.fs || getComputedStyle(e).fontSize);
+            e.dataset.fs = fs;
+            ctx.font = fs + "px JZJ";
+            const w = ctx.measureText(e.textContent.replace(/\s+/g, " ").trim()).width + 48;
+            e.style.fontSize = (w > 880 ? Math.floor((fs * 880) / w) : fs) + "px";
+          });
+        fit();
+        if (document.fonts) document.fonts.ready.then(fit);
+      })();
+
+        window.__timelines = window.__timelines || {};
+        window.__timelines["main"] = tl;
+        tl.seek(0);
+      })();
+    </script>
+  </body>
+</html>
