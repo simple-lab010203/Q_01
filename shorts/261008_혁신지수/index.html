@@ -153,6 +153,8 @@
       <!-- 5. 강점 -->
       <div id="s5" class="clip" data-start="35.5" data-duration="6" data-track-index="1">
         <div id="s5-a" class="t main" style="top: 300px">한국이 특히 강한 곳</div>
+        <div id="s5-sub" class="t sub" style="top: 450px">2026년 기준</div>
+        <div id="s5-sub" class="t sub" style="top: 450px">2026년 기준</div>
         <div id="s5-box1" class="box" style="top: 560px; height: 330px"></div>
         <div id="s5-b" class="t sub" style="top: 600px; font-size: 76px">인적자본·연구</div>
         <div id="s5-c" class="t" style="top: 710px; font-size: 104px"><span class="hl"><i></i>8년 연속 1위</span></div>
@@ -171,6 +173,7 @@
         </div>
         <img id="logo" src="assets/logo.png" alt="" />
         <div id="handle" class="t">@thepoliticsjam</div>
+        <div id="s6-src" class="t sub" style="top: 1170px; font-size: 60px">출처 · WIPO 글로벌 혁신지수</div>
       </div>
 
       <div id="wipe" class="clip" data-start="0" data-duration="48" data-track-index="9"></div>
@@ -352,6 +355,8 @@
         // ---------- 5. 강점 (35.5 ~ 41.5) ----------
         wipe(35.5);
         textIn("#s5-a", 35.6);
+        textIn("#s5-sub", 35.9);
+        textIn("#s5-sub", 35.9);
         tl.fromTo("#s5-box1", { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.6)" }, 36.1);
         textIn("#s5-b", 36.3);
         textIn("#s5-c", 36.7);
@@ -376,8 +381,10 @@
         } else {
           tl.set("#logo", { display: "none" }, 0);
           tl.set("#handle", { top: 880 }, 0);
+          tl.set("#s6-src", { top: 990 }, 0);
         }
         textIn("#handle", 45.5);
+        textIn("#s6-src", 45.9);
         tl.to("#s6", { opacity: 0, duration: 0.5 }, 47.4);
 
 
