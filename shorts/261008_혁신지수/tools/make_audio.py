@@ -93,13 +93,18 @@ EVENTS = [
     # 5. 강점
     (36.1, tick), (37.2, swish), (38.4, tick),
     # 6. 마무리
-    (42.2, swish), (43.4, boop), (44.6, click), (45.2, tick),
+    (42.2, swish),
 ]
+# 마무리 효과음은 버전마다 다름 (로고 버전: 구독 버튼 / 핸들 버전: 버튼 없음)
+ENDING = {
+    "logo": [(43.4, boop), (44.6, click), (45.2, tick)],
+    "handle": [(43.6, tick), (44.1, tick)],
+}
 
 
-def make_sfx():
+def make_sfx(ending):
     out = np.zeros(int(DUR * SR))
-    for t0, fn in EVENTS:
+    for t0, fn in EVENTS + ENDING[ending]:
         s = fn()
         i = int(t0 * SR)
         out[i : i + len(s)] += s[: len(out) - i]
@@ -158,6 +163,7 @@ def save(name, x, peak):
 
 
 if __name__ == "__main__":
-    save("sfx.wav", make_sfx(), 0.9)
+    save("sfx.wav", make_sfx("logo"), 0.9)
+    save("sfx_handle.wav", make_sfx("handle"), 0.9)
     save("bgm.wav", make_bgm(), 0.35)  # 효과음보다 작게
     print("ok")

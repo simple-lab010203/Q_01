@@ -371,20 +371,26 @@
         textIn("#s6-a", 41.6);
         highlight("#s6", 42.2);
         textIn("#s6-b", 42.8);
-        pop("#btn", 43.4);
-        tl.to("#btn", { scale: 0.92, duration: 0.1 }, 44.6);
-        tl.set("#btn-off", { opacity: 1 }, 44.7);
-        tl.set("#btn-on", { opacity: 0 }, 44.7);
-        tl.to("#btn", { scale: 1, duration: 0.25, ease: "back.out(3)" }, 44.7);
         if (C.ending === "logo") {
+          // 유튜브용: 구독 버튼 → 로고 → 핸들 → 출처
+          pop("#btn", 43.4);
+          tl.to("#btn", { scale: 0.92, duration: 0.1 }, 44.6);
+          tl.set("#btn-off", { opacity: 1 }, 44.7);
+          tl.set("#btn-on", { opacity: 0 }, 44.7);
+          tl.to("#btn", { scale: 1, duration: 0.25, ease: "back.out(3)" }, 44.7);
           tl.fromTo("#logo", { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.5, ease: "power2.out" }, 45.2);
+          textIn("#handle", 45.5);
+          textIn("#s6-src", 45.9);
         } else {
-          tl.set("#logo", { display: "none" }, 0);
-          tl.set("#handle", { top: 880 }, 0);
-          tl.set("#s6-src", { top: 990 }, 0);
+          // X(트친)용: 구독 버튼·로고 없이 핸들 → 출처
+          tl.set(["#btn", "#logo"], { display: "none" }, 0);
+          tl.set("#s6-a", { top: 560 }, 0);
+          tl.set("#s6-b", { top: 760 }, 0);
+          tl.set("#handle", { top: 960 }, 0);
+          tl.set("#s6-src", { top: 1070 }, 0);
+          textIn("#handle", 43.6);
+          textIn("#s6-src", 44.1);
         }
-        textIn("#handle", 45.5);
-        textIn("#s6-src", 45.9);
         tl.to("#s6", { opacity: 0, duration: 0.5 }, 47.4);
 
 
